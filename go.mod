@@ -3,7 +3,7 @@ module github.com/NoF0rte/dibsy
 go 1.17
 
 require (
-	github.com/bwmarrin/discordgo v0.23.2
+	github.com/bwmarrin/discordgo v0.23.3-0.20220227163103-4b615bec361d
 	github.com/gocolly/colly/v2 v2.1.0
 	github.com/joho/godotenv v1.4.0
 	github.com/robfig/cron/v3 v3.0.0
@@ -21,7 +21,7 @@ require (
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/gorilla/websocket v1.4.0 // indirect
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
