@@ -24,16 +24,23 @@ type dibbedElement struct {
 }
 
 type Dibsy struct {
-	discord *discordgo.Session
-	cron    *cron.Cron
+	discord       *discordgo.Session
+	cron          *cron.Cron
+	cronIDsByDibs map[Dib]cron.EntryID
 }
 
 func (d Dibsy) ScheduleDib(dib Dib) error {
-	_, err := d.cron.AddFunc(fmt.Sprintf(`@every %s`, dib.Interval), func() {
+	entry, err := d.cron.AddFunc(fmt.Sprintf(`@every %s`, dib.Interval), func() {
 		log.Printf("Executing dib: %s\n", dib.Name)
 		d.ExecDib(dib)
 	})
-	return err
+
+	if err != nil {
+		return err
+	}
+
+	d.cronIDsByDibs[dib] = entry
+	return nil
 }
 
 func (d Dibsy) ExecDib(dib Dib) {
@@ -76,6 +83,7 @@ func (d Dibsy) ExecDib(dib Dib) {
 		if err != nil {
 			log.Println(err)
 		}
+		d.RemoveDib(dib)
 	})
 	collector.Visit(dib.Url)
 }
@@ -97,6 +105,15 @@ func (d Dibsy) Close() {
 	ctx.Done()
 }
 
+func (d Dibsy) RemoveDib(dib Dib) {
+	id, exists := d.cronIDsByDibs[dib]
+	if !exists {
+		return
+	}
+
+	d.cron.Remove(id)
+}
+
 var dibsy Dibsy
 var config *DibsyConfig
 
@@ -109,9 +126,11 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
 		dibsy = Dibsy{
-			discord: discord,
-			cron:    cron.New(),
+			discord:       discord,
+			cron:          cron.New(),
+			cronIDsByDibs: make(map[Dib]cron.EntryID),
 		}
 
 		for _, dib := range config.Dibs {
@@ -124,7 +143,11 @@ var rootCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		dibsy.Start()
+		err := dibsy.Start()
+		if err != nil {
+			return err
+		}
+
 		defer dibsy.Close()
 
 		stop := make(chan os.Signal, 1)
