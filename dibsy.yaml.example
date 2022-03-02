@@ -1,0 +1,9 @@
+---
+notify_channel: "channel_id"
+dibs:
+  - name: Example Dib Name
+    url: https://example.com/my-dib
+    selector: div[class=="example"]
+    if: not (ieq .Attr.title "Taken")
+    interval: 30m
+    message: Your dib is available!
